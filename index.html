@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Office Attendance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card {
+    background: #fff;
+    width: 330px;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    text-align: center;
+  }
+
+  h2 {
+    margin-top: 0;
+    color: #1e3c72;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 15px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .in {
+    background: #2ecc71;
+    color: #fff;
+  }
+
+  .in:hover:not(:disabled) {
+    background: #27ae60;
+  }
+
+  .out {
+    background: #e74c3c;
+    color: #fff;
+  }
+
+  .out:hover:not(:disabled) {
+    background: #c0392b;
+  }
+
+  .status {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  footer {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #aaa;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>Office Attendance</h2>
+
+  <button class="btn in" onclick="submitAction('Sign In')">
+    ✔ Sign In
+  </button>
+
+  <button class="btn out" onclick="submitAction('Sign Out')">
+    ✖ Sign Out
+  </button>
+
+  <div class="status" id="status"></div>
+
+  <footer>Internal Attendance System</footer>
+</div>
+
+<script>
+  const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbyK-nZZygkFWHhxGkTfoayPx8C36gITTMaf5UySKBIHIzzTE1PtA1RWlo_xdvwugz-a/exec";
+
+  const SIGN_IN_FORM =
+  "https://docs.google.com/forms/d/e/1FAIpQLSeL-sYA7fUB-xyXmgGUKeVHh0a7EcV5GnBIPPNIriijz6tPbA/formResponse?entry.1080161945=Balamanikandan_S_IN";
+
+  const SIGN_OUT_FORM =
+  "https://docs.google.com/forms/d/e/1FAIpQLSesGTGuz4c4kL6TBC_mrlN2A3RSbWSOD6lrD0CyVKeKBXeEaA/formResponse?entry.1080161945=Balamanikandan_S_OUT";
+
+  function submitAction(action) {
+
+    const status = document.getElementById("status");
+    const buttons = document.querySelectorAll(".btn");
+
+    // Disable buttons to prevent double click
+    buttons.forEach(btn => btn.disabled = true);
+    status.innerText = "Submitting attendance...";
+
+    // Send data to Apps Script
+    const data = new FormData();
+    data.append("empId", "Balamanikandan");
+    data.append("action", action);
+
+    fetch(WEB_APP_URL, {
+      method: "POST",
+      body: data
+    })
+    .then(() => {
+
+      status.innerText =
+        "✔ " + action + " recorded at " + new Date().toLocaleString();
+
+      // Submit Google Form in same tab (no popup issue)
+      setTimeout(() => {
+        if (action === "Sign In") {
+          window.location.href = SIGN_IN_FORM;
+        } else {
+          window.location.href = SIGN_OUT_FORM;
+        }
+      }, 500);
+
+    })
+    .catch(() => {
+      status.innerText = "❌ Error occurred. Please try again.";
+      buttons.forEach(btn => btn.disabled = false);
+    });
+  }
+</script>
+
+</body>
+</html>
